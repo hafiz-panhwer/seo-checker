@@ -1,9 +1,9 @@
 """
 SEO Checker - core logic
-Ek URL leta hai, uska HTML fetch karta hai, aur basic SEO checks karta hai:
-- Title tag (hai ya nahi, length theek hai ya nahi)
-- Meta description (hai ya nahi, length theek hai ya nahi)
-- H1 tag (kitne hain - ek hona chahiye)
+Takes a URL, fetches its HTML, and runs basic on-page SEO checks:
+- Title tag (present, and correct length)
+- Meta description (present, and correct length)
+- H1 tag (count - there should be exactly one)
 - Images without alt text
 """
 
@@ -24,11 +24,11 @@ def check_seo(url: str) -> dict:
     report["title"] = title_text
     report["title_length"] = len(title_text)
     if not title_text:
-        issues.append("Title tag missing hai")
+        issues.append("Title tag is missing")
     elif len(title_text) > 60:
-        issues.append(f"Title bohot lamba hai ({len(title_text)} characters, 60 se kam rakho)")
+        issues.append(f"Title is too long ({len(title_text)} characters, keep it under 60)")
     elif len(title_text) < 30:
-        issues.append(f"Title bohot chota hai ({len(title_text)} characters, 30-60 ke beech rakho)")
+        issues.append(f"Title is too short ({len(title_text)} characters, keep it between 30-60)")
 
     # Meta description check
     meta_desc = soup.find("meta", attrs={"name": "description"})
@@ -36,20 +36,20 @@ def check_seo(url: str) -> dict:
     report["meta_description"] = desc_text
     report["meta_description_length"] = len(desc_text)
     if not desc_text:
-        issues.append("Meta description missing hai")
+        issues.append("Meta description is missing")
     elif len(desc_text) > 160:
-        issues.append(f"Meta description bohot lambi hai ({len(desc_text)} characters, 160 se kam rakho)")
+        issues.append(f"Meta description is too long ({len(desc_text)} characters, keep it under 160)")
     elif len(desc_text) < 70:
-        issues.append(f"Meta description bohot choti hai ({len(desc_text)} characters, 70-160 ke beech rakho)")
+        issues.append(f"Meta description is too short ({len(desc_text)} characters, keep it between 70-160)")
 
     # H1 check
     h1_tags = soup.find_all("h1")
     report["h1_count"] = len(h1_tags)
     report["h1_texts"] = [h1.text.strip() for h1 in h1_tags]
     if len(h1_tags) == 0:
-        issues.append("H1 tag missing hai")
+        issues.append("H1 tag is missing")
     elif len(h1_tags) > 1:
-        issues.append(f"Page pe {len(h1_tags)} H1 tags hain, sirf ek hona chahiye")
+        issues.append(f"Page has {len(h1_tags)} H1 tags, there should be only one")
 
     # Image alt text check
     images = soup.find_all("img")
@@ -57,7 +57,7 @@ def check_seo(url: str) -> dict:
     report["total_images"] = len(images)
     report["images_without_alt"] = len(images_without_alt)
     if images_without_alt:
-        issues.append(f"{len(images_without_alt)} images mein alt text missing hai")
+        issues.append(f"{len(images_without_alt)} image(s) are missing alt text")
 
     report["issues"] = issues
     report["issues_count"] = len(issues)
@@ -78,6 +78,6 @@ def print_report(url: str, report: dict):
 
 
 if __name__ == "__main__":
-    test_url = input("Check karne ke liye URL daalo (e.g. https://example.com): ").strip()
+    test_url = input("Enter a URL to check (e.g. https://example.com): ").strip()
     result = check_seo(test_url)
     print_report(test_url, result)

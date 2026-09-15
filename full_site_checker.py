@@ -1,7 +1,7 @@
 """
 Full Site SEO Checker
-Ek website ka poora sitemap dhoondta hai (sitemap.xml se, ya agar na mile to
-homepage se internal links crawl karke), aur har page ka SEO check karta hai.
+Discovers every page on a website (via sitemap.xml, or by crawling internal
+links from the homepage if no sitemap is found), and runs an SEO check on each.
 """
 
 import requests
@@ -21,7 +21,7 @@ def get_urls_from_sitemap(base_url: str) -> list:
         root = ElementTree.fromstring(resp.content)
         ns = {"sm": "http://www.sitemaps.org/schemas/sitemap/0.9"}
 
-        # Agar yeh sitemap-index hai (sitemaps ka sitemap), to har sub-sitemap ke andar jao
+        # If this is a sitemap index (a sitemap of sitemaps), recurse into each sub-sitemap
         sitemap_locs = [el.text for el in root.findall(".//sm:sitemap/sm:loc", ns)]
         if sitemap_locs:
             urls = []
@@ -46,7 +46,7 @@ def get_urls_from_sitemap_url(sitemap_url: str) -> list:
 
 
 def get_urls_by_crawling(base_url: str, max_pages: int = 15) -> list:
-    """Sitemap na mile to homepage se same-domain links nikal ke crawl karo (1 level deep)."""
+    """If no sitemap is found, crawl same-domain links from the homepage instead."""
     domain = urlparse(base_url).netloc
     visited = set()
     to_visit = [base_url]
@@ -80,7 +80,7 @@ def check_full_site(base_url: str, max_pages: int = 15) -> list:
         source = "homepage crawl"
 
     urls = urls[:max_pages]
-    print(f"\n{len(urls)} pages mili ({source} ke through). Check kar raha hoon...\n")
+    print(f"\nFound {len(urls)} pages (via {source}). Checking...\n")
 
     results = []
     for url in urls:
@@ -88,7 +88,7 @@ def check_full_site(base_url: str, max_pages: int = 15) -> list:
             report = check_seo(url)
             results.append((url, report))
         except Exception as e:
-            results.append((url, {"issues": [f"Page load nahi hua: {e}"], "issues_count": -1}))
+            results.append((url, {"issues": [f"Page failed to load: {e}"], "issues_count": -1}))
 
     return results
 
@@ -115,6 +115,6 @@ def print_full_site_report(results: list):
 
 
 if __name__ == "__main__":
-    site_url = input("Apni site ka homepage URL daalo (e.g. https://example.com): ").strip()
+    site_url = input("Enter your site's homepage URL (e.g. https://example.com): ").strip()
     results = check_full_site(site_url)
     print_full_site_report(results)

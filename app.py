@@ -1,6 +1,6 @@
 """
 SEO Checker - Web App (Streamlit)
-Browser mein URL daalo, button dabao, SEO report dekho.
+Enter a URL in the browser, click a button, get an SEO report.
 """
 
 import streamlit as st
@@ -94,13 +94,13 @@ st.markdown(
     """
     <div class="hero">
         <h1>🔍 SEO Checker</h1>
-        <p>Kisi bhi webpage ya poori site ka on-page SEO instantly check karo.</p>
+        <p>Instantly check on-page SEO for any webpage or an entire website.</p>
     </div>
     """,
     unsafe_allow_html=True,
 )
 
-tab_single, tab_site = st.tabs(["📄 Ek Page", "🌐 Poori Site"])
+tab_single, tab_site = st.tabs(["📄 Single Page", "🌐 Full Site"])
 
 
 def render_single_report(report: dict):
@@ -128,7 +128,7 @@ def render_single_report(report: dict):
         st.write(f"{report['meta_description'] or '(missing)'}")
         st.caption(f"{report['meta_description_length']} characters")
 
-        st.markdown('<div class="field-label">Images without Alt Text</div>', unsafe_allow_html=True)
+        st.markdown('<div class="field-label">Images Without Alt Text</div>', unsafe_allow_html=True)
         st.write(f"{report['images_without_alt']} / {report['total_images']}")
 
     if report["issues_count"] > 0:
@@ -141,25 +141,25 @@ def render_single_report(report: dict):
 
 
 with tab_single:
-    url = st.text_input("URL daalo", placeholder="https://example.com", key="single_url")
-    if st.button("Check karo", key="single_btn"):
+    url = st.text_input("Enter URL", placeholder="https://example.com", key="single_url")
+    if st.button("Check Now", key="single_btn"):
         if not url.strip():
-            st.warning("Pehle URL daalo.")
+            st.warning("Please enter a URL first.")
         else:
-            with st.spinner("Check ho raha hai..."):
+            with st.spinner("Checking..."):
                 try:
                     report = check_seo(url.strip())
                     render_single_report(report)
                 except Exception as e:
-                    st.error(f"Page check nahi ho saka: {e}")
+                    st.error(f"Could not check the page: {e}")
 
 with tab_site:
-    site_url = st.text_input("Site ka homepage URL daalo", placeholder="https://example.com", key="site_url")
-    if st.button("Poori Site Check Karo", key="site_btn"):
+    site_url = st.text_input("Enter site homepage URL", placeholder="https://example.com", key="site_url")
+    if st.button("Check Full Site", key="site_btn"):
         if not site_url.strip():
-            st.warning("Pehle URL daalo.")
+            st.warning("Please enter a URL first.")
         else:
-            with st.spinner("Sitemap se pages dhoond raha hoon aur check kar raha hoon..."):
+            with st.spinner("Discovering pages via sitemap and checking each one..."):
                 try:
                     results = check_full_site(site_url.strip())
                     total_issues = sum(r.get("issues_count", 0) for _, r in results if r.get("issues_count", 0) > 0)
@@ -178,11 +178,11 @@ with tab_site:
                         label = "No issues" if count == 0 else f"{count} issue(s)"
                         with st.expander(f"{icon} {label} — {page_url}"):
                             if count == 0:
-                                st.write("Koi issue nahi mila.")
+                                st.write("No issues found.")
                             else:
                                 for issue in report.get("issues", []):
                                     st.markdown(f"- {issue}")
                 except Exception as e:
-                    st.error(f"Site check nahi ho saka: {e}")
+                    st.error(f"Could not check the site: {e}")
 
 st.markdown('<div class="footer-note">Built with Python + Streamlit</div>', unsafe_allow_html=True)

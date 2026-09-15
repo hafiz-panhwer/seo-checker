@@ -31,8 +31,8 @@ python full_site_checker.py
 
 ```
 [2 issue(s)] https://example.com/some-page/
-    - Meta description bohot lambi hai (187 characters, 160 se kam rakho)
-    - Page pe 2 H1 tags hain, sirf ek hona chahiye
+    - Meta description is too long (187 characters, keep it under 160)
+    - Page has 2 H1 tags, there should be only one
 ```
 
 ## Roadmap
